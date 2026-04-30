@@ -1,0 +1,6 @@
+{
+  "name": "PoolOracle",
+  "description": "A dual-agent system combining a Web Scraping Agent and a Live Pool Prediction Agent with a terminal-inspired cyberpunk aesthetic.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
