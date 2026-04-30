@@ -21,7 +21,8 @@ import {
   ShieldCheck,
   Target,
   Trophy,
-  History
+  History,
+  Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -49,15 +50,15 @@ interface LogEntry {
   message: string;
 }
 
-type SourceType = 'LIVE' | 'EPL' | 'LA LIGA' | 'UCL' | 'POOLS';
+type SourceType = 'LIVE' | 'EPL' | 'LA LIGA' | '4D' | 'TOTO';
 
 // --- CONSTANTS & DATA ---
 const SOURCES_URLS: Record<SourceType, string> = {
   LIVE: 'https://api.livescore.com/v2/matches/live',
   EPL: 'https://stats.premierleague.com/fixtures/latest',
   'LA LIGA': 'https://www.laliga.com/en-GB/stats/data',
-  UCL: 'https://www.uefa.com/uefachampionsleague/fixtures',
-  POOLS: 'https://www.singaporepools.com.sg/en/product/Pages/4d_results.aspx',
+  '4D': 'https://www.singaporepools.com.sg/en/product/Pages/4d_results.aspx',
+  'TOTO': 'https://www.singaporepools.com.sg/en/product/Pages/toto_results.aspx',
 };
 
 const FIXTURES_DATA: Record<SourceType, Fixture[]> = {
@@ -72,30 +73,18 @@ const FIXTURES_DATA: Record<SourceType, Fixture[]> = {
     { id: 'e2', home: 'Tottenham', away: 'Man Utd', league: 'EPL', h2hCount: 62, history: ["2:0", "2:2", "0:2", "0:3", "1:6"], odds: { home: 2.4, draw: 3.6, away: 2.8 }, lean: 'neutral' },
     { id: 'e3', home: 'Brighton', away: 'Everton', league: 'EPL', h2hCount: 18, history: ["1:1", "1:5", "4:1", "0:2", "0:0"], odds: { home: 1.65, draw: 4.1, away: 4.8 }, lean: 'home' },
     { id: 'e4', home: 'West Ham', away: 'Wolves', league: 'EPL', h2hCount: 22, history: ["3:0", "0:1", "2:0", "1:0", "3:2"], odds: { home: 2.1, draw: 3.3, away: 3.5 }, lean: 'home' },
-    { id: 'e5', home: 'Fulham', away: 'Brentford', league: 'EPL', h2hCount: 12, history: ["0:3", "3:2", "0:0", "1:0", "1:1"], odds: { home: 2.5, draw: 3.2, away: 2.9 }, lean: 'draw' },
-    { id: 'e6', home: 'Nottm Forest', away: 'Bournemouth', league: 'EPL', h2hCount: 8, history: ["2:3", "1:1", "0:1", "0:1", "2:0"], odds: { home: 2.3, draw: 3.2, away: 3.2 }, lean: 'neutral' },
   ],
   'LA LIGA': [
     { id: 'la1', home: 'Barcelona', away: 'Girona', league: 'La Liga', h2hCount: 8, history: ["2:4", "0:0", "1:0", "2:0", "2:2"], odds: { home: 1.55, draw: 4.5, away: 5.4 }, lean: 'home' },
     { id: 'la2', home: 'Atletico Madrid', away: 'Sevilla', league: 'La Liga', h2hCount: 44, history: ["1:0", "6:1", "2:0", "1:1", "0:1"], odds: { home: 1.7, draw: 3.7, away: 4.9 }, lean: 'home' },
-    { id: 'la3', home: 'Valencia', away: 'Real Sociedad', league: 'La Liga', h2hCount: 38, history: ["0:1", "1:0", "0:0", "0:0", "0:1"], odds: { home: 2.8, draw: 3.1, away: 2.6 }, lean: 'away' },
-    { id: 'la4', home: 'Real Betis', away: 'Villarreal', league: 'La Liga', h2hCount: 32, history: ["2:3", "1:0", "1:1", "0:2", "2:1"], odds: { home: 2.4, draw: 3.4, away: 2.9 }, lean: 'neutral' },
   ],
-  UCL: [
-    { id: 'u1', home: 'PSG', away: 'Dortmund', league: 'UCL', h2hCount: 6, history: ["2:0", "1:1", "2:0", "1:2", "0:0"], odds: { home: 1.6, draw: 4.4, away: 4.8 }, lean: 'home' },
-    { id: 'u2', home: 'Man City', away: 'Inter Milan', league: 'UCL', h2hCount: 1, history: ["1:0"], odds: { home: 1.45, draw: 4.8, away: 6.2 }, lean: 'home' },
-    { id: 'u3', home: 'AC Milan', away: 'Newcastle', league: 'UCL', h2hCount: 2, history: ["2:1", "0:0"], odds: { home: 2.2, draw: 3.6, away: 3.2 }, lean: 'neutral' },
-    { id: 'u4', home: 'Lazio', away: 'Celtic', league: 'UCL', h2hCount: 4, history: ["2:0", "2:1", "1:2", "1:2"], odds: { home: 1.75, draw: 3.8, away: 4.5 }, lean: 'home' },
-  ],
-  POOLS: [
+  '4D': [
     { id: 'p1', home: 'Cerezo Osaka', away: 'Albirex Niigata', league: 'J-League', h2hCount: 18, history: ["2:2", "0:1", "1:1", "2:0", "1:0"], odds: { home: 2.0, draw: 3.25, away: 3.4 }, lean: 'home' },
     { id: 'p2', home: 'Sydney FC', away: 'Melbourne City', league: 'A-League', h2hCount: 24, history: ["1:1", "0:0", "2:1", "1:2", "3:0"], odds: { home: 2.3, draw: 3.5, away: 2.8 }, lean: 'neutral' },
+  ],
+  'TOTO': [
     { id: 'p3', home: 'HNK Rijeka', away: 'Osijek', league: 'Prva HNL', h2hCount: 30, history: ["3:0", "0:0", "1:1", "2:1", "1:0"], odds: { home: 1.8, draw: 3.5, away: 4.2 }, lean: 'home' },
     { id: 'p4', home: 'Malmo FF', away: 'AIK', league: 'Allsvenskan', h2hCount: 40, history: ["5:0", "0:0", "3:0", "1:1", "1:0"], odds: { home: 1.5, draw: 4.0, away: 6.0 }, lean: 'home' },
-    { id: 'p5', home: 'Hammarby', away: 'IFK Goteborg', league: 'Allsvenskan', h2hCount: 38, history: ["1:1", "1:1", "3:0", "1:2", "0:0"], odds: { home: 2.1, draw: 3.4, away: 3.2 }, lean: 'neutral' },
-    { id: 'p6', home: 'Gremio', away: 'Flamengo', league: 'Serie A', h2hCount: 45, history: ["3:2", "0:3", "0:4", "2:2", "0:2"], odds: { home: 2.9, draw: 3.2, away: 2.4 }, lean: 'away' },
-    { id: 'p7', home: 'Columbus Crew', away: 'LAFC', league: 'MLS', h2hCount: 5, history: ["2:1", "0:2", "1:0", "0:3", "1:0"], odds: { home: 2.2, draw: 3.5, away: 2.9 }, lean: 'neutral' },
-    { id: 'p8', home: 'Vissel Kobe', away: 'Kawasaki Frontale', league: 'J-League', h2hCount: 28, history: ["1:0", "2:2", "1:2", "1:3", "1:1"], odds: { home: 2.5, draw: 3.4, away: 2.6 }, lean: 'draw' },
   ],
 };
 
@@ -272,7 +261,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative w-full h-screen flex flex-col p-4 z-10">
+    <div className="relative w-full min-h-screen lg:h-screen flex flex-col p-4 z-10">
       <div className="grid-overlay" />
       
       {/* HEADER */}
@@ -319,114 +308,114 @@ export default function App() {
       </section>
 
       {/* MAIN GRID */}
-      <main className="flex-1 grid grid-cols-[380px,1fr] gap-4 min-h-0">
+      <main className="flex-1 flex flex-col lg:grid lg:grid-cols-[380px,1fr] gap-4 min-h-0 overflow-visible lg:overflow-hidden pb-10 lg:pb-0">
         
         {/* LEFT PANEL */}
-        <div className="bento-panel">
-          <div className="panel-header-alt">⟩ WEB SCRAPING AGENT</div>
+        <div className="bento-panel h-fit lg:h-full flex flex-col flex-shrink-0">
+          <div className="panel-header-alt flex-shrink-0">⟩ WEB SCRAPING AGENT</div>
           <div className="flex flex-col gap-4 p-4 flex-1 min-h-0">
             {/* Source Tabs */}
-            <div className="bg-black/60 p-1 rounded-lg border border-white/10 flex gap-1">
-            {(['LIVE', 'EPL', 'LA LIGA', 'UCL', 'POOLS'] as SourceType[]).map(tab => (
-              <button
-                key={tab}
-                onClick={() => handleSourceTab(tab)}
-                className={`flex-1 py-2 rounded text-[10px] font-bold tracking-tighter transition-all duration-300 ${
-                  currentSource === tab 
-                    ? 'bg-cyan-glow text-black shadow-[0_0_10px_rgba(0,229,255,0.4)]' 
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                {tab === 'LIVE' && '⚡ '}
-                {tab === 'EPL' && '🏴 '}
-                {tab === 'LA LIGA' && '🇪🇸 '}
-                {tab === 'UCL' && '🏆 '}
-                {tab === 'POOLS' && '🎱 '}
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          {/* URL Input */}
-          <div className="terminal-box p-3 flex flex-col gap-2">
-            <div className="flex items-center gap-2 text-[10px] text-cyan-glow/60 uppercase">
-              <Search size={12} /> Target Scraping URL
+            <div className="bg-black/60 p-1 rounded-lg border border-white/10 flex gap-1 overflow-x-auto scrollbar-hide flex-shrink-0">
+              {(['LIVE', 'EPL', 'LA LIGA', '4D', 'TOTO'] as SourceType[]).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => handleSourceTab(tab)}
+                  className={`flex-1 min-w-[70px] py-2 rounded text-[10px] font-bold tracking-tighter transition-all duration-300 ${
+                    currentSource === tab 
+                      ? 'bg-cyan-glow text-black shadow-[0_0_10px_rgba(0,229,255,0.4)]' 
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {tab === 'LIVE' && '⚡ '}
+                  {tab === 'EPL' && '🏴 '}
+                  {tab === 'LA LIGA' && '🇪🇸 '}
+                  {tab === '4D' && '🎱 '}
+                  {tab === 'TOTO' && '🎲 '}
+                  {tab}
+                </button>
+              ))}
             </div>
-            <div className="flex gap-2">
-              <input 
-                type="text" 
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                readOnly
-                className="flex-1 bg-black/40 border border-white/10 rounded px-3 py-2 text-xs font-mono-data text-white/80 focus:outline-none focus:border-cyan-glow/50"
-              />
-              <button 
-                onClick={runScrape}
-                disabled={isScraping}
-                className="bg-cyan-glow hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-black font-black px-4 rounded text-xs flex items-center gap-2 active:scale-95"
-              >
-                {isScraping ? <RefreshCw size={14} className="animate-spin" /> : <Zap size={14} />}
-                {isScraping ? 'SCRAPING...' : 'SCRAPE'}
-              </button>
-            </div>
-          </div>
 
-          {/* Terminal Log */}
-          <div className="terminal-box flex flex-col min-h-[220px]">
-            <div className="flex justify-between items-center px-3 py-2 border-b border-white/5 bg-white/5">
-              <div className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-white/50">
-                <TerminalIcon size={12} /> SCRAPE_AGENT_TERMINAL
+            {/* URL Input */}
+            <div className="terminal-box p-3 flex flex-col gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 text-[10px] text-cyan-glow/60 uppercase">
+                <Search size={12} /> Target Scraping URL
               </div>
-              <button onClick={() => setLogs([])} className="text-[10px] text-white/30 hover:text-white/60">CLR</button>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  readOnly
+                  className="flex-1 bg-black/40 border border-white/10 rounded px-3 py-2 text-xs font-mono-data text-white/80 focus:outline-none focus:border-cyan-glow/50 whitespace-nowrap overflow-hidden text-ellipsis"
+                />
+                <button 
+                  onClick={runScrape}
+                  disabled={isScraping}
+                  className="bg-cyan-glow hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-black font-black px-4 rounded text-xs flex items-center gap-2 active:scale-95 whitespace-nowrap"
+                >
+                  {isScraping ? <RefreshCw size={14} className="animate-spin" /> : <Zap size={14} />}
+                  SCRAPE
+                </button>
+              </div>
             </div>
-            <div className="flex-1 p-3 overflow-y-auto custom-scrollbar font-mono-data text-[11px] space-y-1">
-              {logs.length === 0 ? (
-                <div className="text-white/20 italic">No output. Awaiting scrape instruction...</div>
-              ) : (
-                logs.map((log, idx) => (
-                  <div key={idx} className="flex gap-2">
-                    <span className="text-white/30">[{log.timestamp}]</span>
-                    <span className={log.type === 'ok' ? 'text-green-glow' : log.type === 'err' ? 'text-red-glow' : log.type === 'warn' ? 'text-orange-glow' : 'text-cyan-glow'}>
-                      {log.type.toUpperCase()}:
-                    </span>
-                    <span className="text-white/80">{log.message}</span>
-                  </div>
-                ))
-              )}
-              <div ref={logEndRef} />
-            </div>
-          </div>
 
-          {/* Match List */}
-          <div className="flex-1 min-h-0 flex flex-col gap-2 overflow-hidden">
-             <div className="text-[10px] font-bold text-white/40 uppercase px-1 flex justify-between">
-                <span>Discovered Fixtures</span>
-                <span>{foundFixtures.length} Results</span>
-             </div>
-             <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2">
-               {foundFixtures.length === 0 ? (
-                 <div className="h-full flex flex-col items-center justify-center border border-dashed border-white/10 rounded-lg opacity-20">
-                    <Database size={40} className="mb-2" />
-                    <span className="text-sm">Database Empty</span>
-                 </div>
-               ) : (
-                 foundFixtures.map(fixture => (
-                   <MatchCard 
-                    key={fixture.id} 
-                    fixture={fixture} 
-                    isSelected={selectedFixture?.id === fixture.id}
-                    onClick={() => handleMatchSelect(fixture)}
-                   />
-                 ))
-               )}
-             </div>
+            {/* Terminal Log */}
+            <div className="terminal-box flex flex-col min-h-[160px] lg:min-h-[220px]">
+              <div className="flex justify-between items-center px-3 py-2 border-b border-white/5 bg-white/5 flex-shrink-0">
+                <div className="flex items-center gap-2 text-[10px] font-bold tracking-widest text-white/50">
+                  <TerminalIcon size={12} /> SCRAPE_AGENT_TERMINAL
+                </div>
+                <button onClick={() => setLogs([])} className="text-[10px] text-white/30 hover:text-white/60">CLR</button>
+              </div>
+              <div className="flex-1 p-3 overflow-y-auto custom-scrollbar font-mono-data text-[11px] space-y-1">
+                {logs.length === 0 ? (
+                  <div className="text-white/20 italic">No output. Awaiting scrape instruction...</div>
+                ) : (
+                  logs.map((log, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <span className="text-white/30">[{log.timestamp}]</span>
+                      <span className={log.type === 'ok' ? 'text-green-glow' : log.type === 'err' ? 'text-red-glow' : log.type === 'warn' ? 'text-orange-glow' : 'text-cyan-glow'}>
+                        {log.type.toUpperCase()}:
+                      </span>
+                      <span className="text-white/80">{log.message}</span>
+                    </div>
+                  ))
+                )}
+                <div ref={logEndRef} />
+              </div>
+            </div>
+
+            {/* Match List */}
+            <div className="flex-1 min-h-[200px] lg:min-h-0 flex flex-col gap-2 overflow-hidden">
+               <div className="text-[10px] font-bold text-white/40 uppercase px-1 flex justify-between flex-shrink-0">
+                  <span>Discovered Fixtures</span>
+                  <span>{foundFixtures.length} Results</span>
+               </div>
+               <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-2">
+                 {foundFixtures.length === 0 ? (
+                   <div className="h-full min-h-[120px] flex flex-col items-center justify-center border border-dashed border-white/10 rounded-lg opacity-20">
+                      <Database size={40} className="mb-2" />
+                      <span className="text-sm">Database Empty</span>
+                   </div>
+                 ) : (
+                   foundFixtures.map(fixture => (
+                     <MatchCard 
+                      key={fixture.id} 
+                      fixture={fixture} 
+                      isSelected={selectedFixture?.id === fixture.id}
+                      onClick={() => handleMatchSelect(fixture)}
+                     />
+                   ))
+                 )}
+               </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* RIGHT PANEL - PREDICTION ENGINE */}
-        <div className="bento-panel flex flex-col overflow-hidden">
-          <div className="panel-header-alt">⟩ PREDICTION ENGINE v2.8</div>
+        {/* RIGHT PANEL - PREDICTION ENGINE */}
+        <div className="bento-panel flex flex-col overflow-hidden h-fit lg:h-full min-h-[400px]">
+          <div className="panel-header-alt flex-shrink-0">⟩ PREDICTION ENGINE v2.8</div>
           <AnimatePresence mode="wait">
             {!selectedFixture ? (
               <motion.div 
@@ -497,15 +486,29 @@ export default function App() {
                       <ProbabilityBar label="DRAW" percent={predictionData.probs.draw} color="from-purple-glow to-indigo-600" />
                       <ProbabilityBar label="AWAY WIN" percent={predictionData.probs.away} color="from-orange-glow to-red-600" />
                       
-                      {currentSource === 'POOLS' && (
-                        <div className="p-3 bg-cyan-glow/5 border border-cyan-glow/20 rounded-lg mt-2">
-                           <div className="text-[9px] font-bold text-cyan-glow uppercase tracking-[0.2em] mb-2">Live Pools Numbers (Forecast)</div>
-                           <div className="flex gap-2">
-                             {[1,2,3,4].map(i => (
-                               <div key={i} className="flex-1 bg-black/60 border border-cyan-glow/30 p-2 rounded text-center text-lg font-black text-cyan-glow font-header">
-                                 {Math.floor(Math.random() * 10)}
+                      {(currentSource === '4D' || currentSource === 'TOTO') && (
+                        <div className="p-4 bg-cyan-glow/5 border border-cyan-glow/20 rounded-xl mt-4 relative overflow-hidden group">
+                           <div className="absolute -right-4 -top-4 w-16 h-16 bg-cyan-glow/10 rounded-full blur-2xl group-hover:bg-cyan-glow/20 transition-all" />
+                           <div className="flex justify-between items-center mb-3">
+                              <div className="text-[10px] font-black text-cyan-glow uppercase tracking-[0.2em] flex items-center gap-2">
+                                <Sparkles size={12} className="animate-pulse" /> RECOMMENDED TO BUY
+                              </div>
+                              <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest font-mono-data">Draw #{Math.floor(Math.random() * 4000) + 1000}</div>
+                           </div>
+                           <div className={`grid ${currentSource === '4D' ? 'grid-cols-4' : 'grid-cols-3 sm:grid-cols-6'} gap-2`}>
+                             {(currentSource === '4D' ? [1,2,3,4] : [1,2,3,4,5,6]).map(i => (
+                               <div key={i} className="aspect-square flex items-center justify-center bg-black/60 border border-cyan-glow/30 rounded-lg text-xl font-black text-white hover:border-cyan-glow shadow-lg transition-all hover:-translate-y-0.5">
+                                 {currentSource === '4D' ? Math.floor(Math.random() * 10) : Math.floor(Math.random() * 49) + 1}
                                </div>
                              ))}
+                           </div>
+                           <div className="mt-3 pt-3 border-t border-white/5 flex justify-between items-center">
+                              <span className="text-[8px] text-white/40 uppercase font-bold tracking-tighter italic">Algorithm: Quantum_Sieve_v4</span>
+                              <div className="flex gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-glow animate-pulse" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-glow/50" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-glow/20" />
+                              </div>
                            </div>
                         </div>
                       )}
@@ -580,7 +583,7 @@ export default function App() {
                   </div>
 
                   {/* BOTTOM ROW (H2H + Recent Form) */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div className="bg-black/40 border border-white/10 rounded-lg p-4">
                       <div className="flex items-center gap-2 text-[10px] font-bold text-white/40 uppercase mb-4 tracking-widest">
                         <History size={14} className="text-cyan-glow" /> H2H Historical Meetings
