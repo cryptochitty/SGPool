@@ -41,10 +41,28 @@ export default function App() {
         </header>
 
         {/* Next Draw Date */}
-        <div className="bg-white/[0.03] p-5 rounded-2xl border border-white/5 mb-8 flex flex-col items-center justify-center relative z-10 transition-all hover:bg-white/[0.05]">
+        <div className="bg-white/[0.03] p-5 rounded-2xl border border-white/5 mb-4 flex flex-col items-center justify-center relative z-10 transition-all hover:bg-white/[0.05]">
           <Calendar className="text-cyan-glow mb-2" size={24} />
           <div className="text-[10px] text-white/20 uppercase font-black tracking-widest mb-1">Next TOTO Draw</div>
           <div className="text-xl font-black text-white tracking-tight">Mon, 04 May 2026</div>
+        </div>
+
+        {/* Monthly Draw Schedule */}
+        <div className="mb-8 relative z-10">
+          <div className="text-[10px] text-white/20 uppercase font-black tracking-widest mb-3 pl-2">May 2026 Draw Schedule</div>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { d: '04', w: 'MON' }, { d: '07', w: 'THU' },
+              { d: '11', w: 'MON' }, { d: '14', w: 'THU' },
+              { d: '18', w: 'MON' }, { d: '21', w: 'THU' },
+              { d: '25', w: 'MON' }, { d: '28', w: 'THU' },
+            ].map((draw, i) => (
+              <div key={i} className="bg-white/[0.02] border border-white/5 py-3 px-4 rounded-xl flex justify-between items-center group hover:border-cyan-glow/20 transition-all">
+                <span className="text-xs font-bold text-white/40 group-hover:text-cyan-glow transition-colors">{draw.w}</span>
+                <span className="text-sm font-black text-white">{draw.d} MAY</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Action Button */}
